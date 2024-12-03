@@ -21,7 +21,7 @@ function App() {
             console.log(data);
             setRooms(data);
         }
-        fetchRooms();
+        fetchRooms().then(r => console.log('Rooms fetched'));
     }, []);
 
     useEffect(() => {
@@ -34,11 +34,19 @@ function App() {
             setRoomData(room);
         });
 
+        // Mise à jour des rooms en temps réel
+        socket.on('updateRooms', (updatedRooms) => {
+            console.log('Rooms updated:', updatedRooms);
+            setRooms(updatedRooms);
+        });
+
         return () => {
             socket.off('message');
             socket.off('roomData');
+            socket.off('updateRooms');
         };
     }, []);
+
 
     const createRoom = (roomName) => {
         if (roomName && username) {
@@ -79,64 +87,79 @@ function App() {
                 <div>
                     <input
                         type="text"
-                        placeholder="Créer une room"
+                        placeholder="Nom de la room"
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                     />
                     <div>
-                        <label>Private Room</label>
-                        <input type={"checkbox"} onChange={() => setPrivateRoom(!privateRoom)}/>
+                        <label>
+                            Private Room
+                            <input
+                                type="checkbox"
+                                onChange={() => setPrivateRoom(!privateRoom)}
+                            />
+                        </label>
                     </div>
                     <input
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder="Nom d'utilisateur"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
-                    <button onClick={() => createRoom(roomName)}>Créer ma room</button>
+                    <button onClick={() => createRoom(roomName)}>Créer une Room</button>
                 </div>
             ) : (
                 <div>
-                    <button onClick={leaveRoom}>Leave Room</button>
-                    <ul id="messages">
-                        {messages.map((msg, index) => (
-                            <li key={index}>
-                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} <b>{msg.username}</b>: <b>{msg.text}</b>
-                            </li>
-                        ))}
-                    </ul>
+                    <button onClick={leaveRoom}>Quitter la Room</button>
+                    <div id="messages">
+                        <ul>
+                            {messages.map((msg, index) => (
+                                <li key={index}>
+                                <span>
+                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                    <strong>{msg.username}</strong>: {msg.text}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                     <input
                         type="text"
-                        placeholder="Enter message"
+                        placeholder="Entrer un message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                     />
-                    <button onClick={sendMessage}>Send Message</button>
+                    <button onClick={sendMessage}>Envoyer</button>
                 </div>
             )}
             {inRoom && (
                 <div>
-                    <h2>Users in room:</h2>
+                    <h2>Utilisateurs dans la Room :</h2>
                     <ul>
-                        {roomData && roomData.users.map((user, index) => (
+                        {roomData.users.map((user, index) => (
                             <li key={index}>{user.username} : {user.points}</li>
                         ))}
                     </ul>
                 </div>
             )}
-            <h2>Rooms:</h2>
-            <ul>
-                {rooms && rooms.map((room, index) => (
+            <h2>Rooms :</h2>
+            <div className="rooms-container">
+                {rooms.map((room, index) => (
                     !room.private && (
-                        <div key={index} style={{display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "row", backgroundColor: "red", cursor: "pointer", margin: "0 0 2em 0"}} onClick={() => joinRoom(room.roomId)}>
+                        <div
+                            key={index}
+                            className="room-card"
+                            onClick={() => joinRoom(room.roomId)}
+                        >
                             <p>{room.roomName}</p>
-                            <p>{room.users.length}</p>
+                            <p>{room.users.length} participants</p>
                         </div>
                     )
                 ))}
-            </ul>
+            </div>
         </div>
     );
+
 }
 
 export default App;
