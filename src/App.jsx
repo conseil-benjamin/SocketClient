@@ -34,7 +34,7 @@ function App() {
             setRoomData(room);
         });
 
-        // Mise à jour des rooms en temps réel
+        // Real-time rooms update
         socket.on('updateRooms', (updatedRooms) => {
             console.log('Rooms updated:', updatedRooms);
             setRooms(updatedRooms);
@@ -87,7 +87,7 @@ function App() {
                 <div>
                     <input
                         type="text"
-                        placeholder="Nom de la room"
+                        placeholder="Room Name"
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                     />
@@ -102,15 +102,15 @@ function App() {
                     </div>
                     <input
                         type="text"
-                        placeholder="Nom d'utilisateur"
+                        placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
-                    <button onClick={() => createRoom(roomName)}>Créer une Room</button>
+                    <button onClick={() => createRoom(roomName)}>Create Room</button>
                 </div>
             ) : (
                 <div>
-                    <button onClick={leaveRoom}>Quitter la Room</button>
+                    <button onClick={leaveRoom}>Leave Room</button>
                     <div id="messages">
                         <ul>
                             {messages.map((msg, index) => (
@@ -125,16 +125,16 @@ function App() {
                     </div>
                     <input
                         type="text"
-                        placeholder="Entrer un message"
+                        placeholder="Enter a message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                     />
-                    <button onClick={sendMessage}>Envoyer</button>
+                    <button onClick={sendMessage}>Send</button>
                 </div>
             )}
             {inRoom && (
                 <div>
-                    <h2>Utilisateurs dans la Room :</h2>
+                    <h2>Users in the Room:</h2>
                     <ul>
                         {roomData.users.map((user, index) => (
                             <li key={index}>{user.username} : {user.points}</li>
@@ -142,7 +142,7 @@ function App() {
                     </ul>
                 </div>
             )}
-            <h2>Rooms :</h2>
+            <h2>Rooms:</h2>
             <div className="rooms-container">
                 {rooms.map((room, index) => (
                     !room.private && (
@@ -159,7 +159,6 @@ function App() {
             </div>
         </div>
     );
-
 }
 
 export default App;
